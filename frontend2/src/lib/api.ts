@@ -5,13 +5,18 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:1504
 
 export class MusicAPI {
   private static async request(endpoint: string, params?: Record<string, string>) {
-    const url = new URL(`${API_BASE_URL}${endpoint}`);
+    // For production (when API_BASE_URL is '/'), use relative URLs
+    const baseUrl = API_BASE_URL === '/' ? '' : API_BASE_URL;
+    const fullEndpoint = `${baseUrl}${endpoint}`;
+    
+    const url = new URL(fullEndpoint, window.location.origin);
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         url.searchParams.append(key, value);
       });
     }
     
+    console.log('Making API request to:', url.toString());
     const response = await fetch(url.toString());
     if (!response.ok) {
       throw new Error(`API request failed: ${response.statusText}`);
@@ -25,7 +30,12 @@ export class MusicAPI {
   }
 
   static async getCharts(): Promise<Record<string, Track[]>> {
-    const response = await fetch(`${API_BASE_URL}/api/charts`);
+    // For production (when API_BASE_URL is '/'), use relative URLs
+    const baseUrl = API_BASE_URL === '/' ? '' : API_BASE_URL;
+    const fullUrl = `${baseUrl}/api/charts`;
+    
+    console.log('Fetching charts from:', fullUrl);
+    const response = await fetch(fullUrl);
     if (!response.ok) {
       throw new Error(`Failed to fetch charts: ${response.statusText}`);
     }
@@ -43,7 +53,12 @@ export class MusicAPI {
   }
 
   static async getChartsByCountry(country: string): Promise<Track[]> {
-    const response = await fetch(`${API_BASE_URL}/api/charts/${country}`);
+    // For production (when API_BASE_URL is '/'), use relative URLs
+    const baseUrl = API_BASE_URL === '/' ? '' : API_BASE_URL;
+    const fullUrl = `${baseUrl}/api/charts/${country}`;
+    
+    console.log('Fetching country charts from:', fullUrl);
+    const response = await fetch(fullUrl);
     if (!response.ok) {
       throw new Error(`Failed to fetch charts for ${country}: ${response.statusText}`);
     }
