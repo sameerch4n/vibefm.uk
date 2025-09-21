@@ -16,6 +16,8 @@ import { storage } from '@/lib/storage';
 import { Track, Playlist } from '@/types';
 
 function App() {
+  console.log('🎵 VibeFM: App component rendering...');
+  
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [wasPlayingBeforeHotShot, setWasPlayingBeforeHotShot] = useState(false);
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
