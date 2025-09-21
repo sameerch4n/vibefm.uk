@@ -186,7 +186,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // In production, serve the built frontend
 if (process.env.NODE_ENV === 'production') {
-  const frontendDistPath = path.join(__dirname, 'frontend2/dist');
+  // In Docker, the frontend is built to /app/dist
+  const frontendDistPath = path.join(__dirname, 'dist');
   app.use(express.static(frontendDistPath));
   
   // Handle client-side routing - serve index.html for all non-API routes

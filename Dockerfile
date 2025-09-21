@@ -28,8 +28,8 @@ RUN npm ci --only=production
 # Copy backend source code
 COPY backend/ ./
 
-# Copy built frontend from previous stage
-COPY --from=frontend-builder /app/frontend2/dist ./frontend2/dist
+# Copy built frontend from previous stage to the correct location
+COPY --from=frontend-builder /app/frontend2/dist ./dist
 
 # Copy public assets for frontend (if any)
 COPY frontend2/public ./frontend2/public
