@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Music Player</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <style>
+    .player-bar {
+      transform: translateY(100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    .player-bar.visible {
+      transform: translateY(0);
+    }
+    .expanded-player {
+      transform: translateY(100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    .expanded-player.visible {
+      transform: translateY(0);
+    }
+    .progress-bar {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    .progress-bar::-webkit-slider-track {
+      background: #e5e7eb;
+      height: 4px;
+      border-radius: 2px;
+    }
+    .progress-bar::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      background: #3b82f6;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .progress-bar::-moz-range-track {
+      background: #e5e7eb;
+      height: 4px;
+      border-radius: 2px;
+      border: none;
+    }
+    .progress-bar::-moz-range-thumb {
+      background: #3b82f6;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Main Content -->
+  <div class="container mx-auto px-4 py-8 pb-32">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-2">Music Player</h1>
+      <p class="text-gray-600">Discover and play your favorite music</p>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="max-w-2xl mx-auto mb-8">
+      <div class="relative">
+        <input 
+          id="searchInput" 
+          type="text" 
+          placeholder="Search for songs, artists, or albums..." 
+          class="w-full px-4 py-3 pl-12 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+        />
+        <i data-feather="search" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div id="status" class="text-center text-sm text-red-500 mb-4"></div>
+
+    <!-- Search Results -->
+    <div id="searchResults" class="hidden mb-8">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Search Results</h2>
+      <div id="resultsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+
+    <!-- Top Charts -->
+    <div id="topCharts" class="mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold text-gray-900">Top Charts</h2>
+                    <select id="countrySelect" class="bg-gray-700 text-white px-3 py-2 rounded">
+              <option value="USA">USA</option>
+              <option value="India (Bollywood)">India (Bollywood)</option>
+            </select>
+      </div>
+      <div id="chartsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+  </div>
+
+  <!-- Music Player Bar (Bottom) -->
+  <div id="playerBar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 player-bar shadow-lg">
+    <div class="container mx-auto px-4 py-3">
+      <div class="flex items-center justify-between">
+        <!-- Track Info -->
+        <div class="flex items-center space-x-3 flex-1 min-w-0">
+          <img id="playerCover" src="" alt="Album cover" class="w-12 h-12 rounded-lg object-cover bg-gray-200" />
+          <div class="min-w-0 flex-1">
+            <p id="playerTitle" class="text-sm font-medium text-gray-900 truncate">No track selected</p>
+            <p id="playerArtist" class="text-xs text-gray-500 truncate">Select a song to start playing</p>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center space-x-4">
+          <button id="prevBtn" class="text-gray-600 hover:text-gray-900 disabled:opacity-50" disabled>
+            <i data-feather="skip-back" class="w-5 h-5"></i>
+          </button>
+          <button id="playPauseBtn" class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full disabled:opacity-50" disabled>
+            <i data-feather="play" class="w-5 h-5"></i>
+          </button>
+          <button id="nextBtn" class="text-gray-600 hover:text-gray-900 disabled:opacity-50" disabled>
+            <i data-feather="skip-forward" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Expand Button -->
+        <div class="flex items-center space-x-2">
+          <button id="expandBtn" class="text-gray-600 hover:text-gray-900 disabled:opacity-50" disabled>
+            <i data-feather="maximize-2" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expanded Player (Full Screen) -->
+  <div id="expandedPlayer" class="fixed inset-0 bg-white z-50 expanded-player">
+    <div class="container mx-auto px-4 py-8 h-full flex flex-col">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-8">
+        <button id="minimizeBtn" class="text-gray-600 hover:text-gray-900">
+          <i data-feather="chevron-down" class="w-6 h-6"></i>
+        </button>
+        <h2 class="text-lg font-semibold text-gray-900">Now Playing</h2>
+        <div class="w-6"></div>
+      </div>
+
+      <!-- Album Cover -->
+      <div class="flex-1 flex items-center justify-center">
+        <img id="expandedCover" src="" alt="Album cover" class="w-80 h-80 rounded-2xl object-cover shadow-2xl bg-gray-200" />
+      </div>
+
+      <!-- Track Info -->
+      <div class="text-center mb-8">
+        <h1 id="expandedTitle" class="text-2xl font-bold text-gray-900 mb-2">No track selected</h1>
+        <p id="expandedArtist" class="text-lg text-gray-600 mb-1">Select a song to start playing</p>
+        <p id="expandedAlbum" class="text-sm text-gray-500">Unknown Album</p>
+        <button id="iTunesMetadataBtn" class="mt-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm disabled:opacity-50" disabled>
+          View iTunes Info
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="mb-6">
+        <input 
+          id="progressBar" 
+          type="range" 
+          min="0" 
+          max="100" 
+          value="0" 
+          class="w-full progress-bar"
+          disabled
+        />
+        <div class="flex justify-between text-xs text-gray-500 mt-1">
+          <span id="currentTime">0:00</span>
+          <span id="totalTime">0:00</span>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex items-center justify-center space-x-8 mb-6">
+        <button id="shuffleBtn" class="text-gray-600 hover:text-gray-900">
+          <i data-feather="shuffle" class="w-5 h-5"></i>
+        </button>
+        <button id="expandedPrevBtn" class="text-gray-600 hover:text-gray-900 disabled:opacity-50" disabled>
+          <i data-feather="skip-back" class="w-6 h-6"></i>
+        </button>
+        <button id="rewind10Btn" class="text-gray-600 hover:text-gray-900 disabled:opacity-50" disabled>
+          <i data-feather="rotate-ccw" class="w-5 h-5"></i>
+        </button>
+        <button id="expandedPlayPauseBtn" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full disabled:opacity-50" disabled>
+          <i data-feather="play" class="w-6 h-6"></i>
+        </button>
+        <button id="forward10Btn" class="text-gray-600 hover:text-gray-900 disabled:opacity-50" disabled>
+          <i data-feather="rotate-cw" class="w-5 h-5"></i>
+        </button>
+        <button id="expandedNextBtn" class="text-gray-600 hover:text-gray-900 disabled:opacity-50" disabled>
+          <i data-feather="skip-forward" class="w-6 h-6"></i>
+        </button>
+        <button id="repeatBtn" class="text-gray-600 hover:text-gray-900">
+          <i data-feather="repeat" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Speed Control -->
+      <div class="flex items-center justify-center space-x-4">
+        <span class="text-sm text-gray-600">Speed:</span>
+        <select id="speedControl" class="px-3 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <option value="0.5">0.5x</option>
+          <option value="0.75">0.75x</option>
+          <option value="1" selected>1x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2x</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden YouTube Player -->
+  <div id="youtubePlayer" style="position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></div>
+
+  <script>
+    // Initialize Feather icons
+    feather.replace();
+
+    // API helper
+    const api = (path, params) => fetch(`http://localhost:5178${path}` + (params ? `?${new URLSearchParams(params)}` : ''));
+
+    // Global state
+    let currentTrack = null;
+    let isPlaying = false;
+    let player = null;
+    let currentPlaylist = [];
+    let currentIndex = -1;
+
+    // DOM elements
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    const resultsList = document.getElementById('resultsList');
+    const topCharts = document.getElementById('topCharts');
+    const chartsList = document.getElementById('chartsList');
+    const countrySelect = document.getElementById('countrySelect');
+    const status = document.getElementById('status');
+    
+    // Player elements
+    const playerBar = document.getElementById('playerBar');
+    const expandedPlayer = document.getElementById('expandedPlayer');
+    const playerCover = document.getElementById('playerCover');
+    const playerTitle = document.getElementById('playerTitle');
+    const playerArtist = document.getElementById('playerArtist');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const expandBtn = document.getElementById('expandBtn');
+    const minimizeBtn = document.getElementById('minimizeBtn');
+    const progressBar = document.getElementById('progressBar');
+    const currentTimeEl = document.getElementById('currentTime');
+    const totalTimeEl = document.getElementById('totalTime');
+    const speedControl = document.getElementById('speedControl');
+
+    // Expanded player elements
+    const expandedCover = document.getElementById('expandedCover');
+    const expandedTitle = document.getElementById('expandedTitle');
+    const expandedArtist = document.getElementById('expandedArtist');
+    const expandedAlbum = document.getElementById('expandedAlbum');
+    const expandedPlayPauseBtn = document.getElementById('expandedPlayPauseBtn');
+    const rewind10Btn = document.getElementById('rewind10Btn');
+    const forward10Btn = document.getElementById('forward10Btn');
+
+    // Debounce function
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // Search functionality
+    async function searchMusic(query) {
+      if (!query.trim()) {
+        searchResults.classList.add('hidden');
+        return;
+      }
+
+      status.textContent = 'Searching...';
+      try {
+        const response = await api('/api/search', { q: query, limit: 12 });
+        if (!response.ok) throw new Error('Search failed');
+        const results = await response.json();
+        
+        displaySearchResults(results);
+        status.textContent = '';
+      } catch (error) {
+        console.error('Search error:', error);
+        status.textContent = 'Search failed. Make sure the server is running.';
+      }
+    }
+
+    // Display search results
+    function displaySearchResults(results) {
+      if (results.length === 0) {
+        searchResults.classList.add('hidden');
+        status.textContent = 'No results found.';
+        return;
+      }
+
+      resultsList.innerHTML = '';
+      results.forEach((track, index) => {
+        const trackCard = createTrackCard(track, index, results);
+        resultsList.appendChild(trackCard);
+      });
+      
+      searchResults.classList.remove('hidden');
+    }
+
+    // Load top charts
+    async function loadTopCharts(country = 'US') {
+      try {
+        status.textContent = 'Loading charts...';
+        const response = await fetch('/api/charts');
+        if (!response.ok) throw new Error('Charts failed');
+        const chartsData = await response.json();
+        
+        // Extract charts based on selected country
+        let charts = [];
+        if (country === 'USA' && chartsData['USA']) {
+          charts = chartsData['USA'];
+        } else if (country === 'India (Bollywood)' && chartsData['India (Bollywood)']) {
+          charts = chartsData['India (Bollywood)'];
+        } else {
+          // Default to first available region
+          const firstRegion = Object.keys(chartsData)[0];
+          if (firstRegion) {
+            charts = chartsData[firstRegion];
+          }
+        }
+        
+        displayCharts(charts);
+        status.textContent = '';
+      } catch (error) {
+        console.error('Charts error:', error);
+        status.textContent = 'Failed to load charts.';
+      }
+    }
+
+    // Display charts
+    function displayCharts(charts) {
+      chartsList.innerHTML = '';
+      charts.forEach((track, index) => {
+        const trackCard = createTrackCard(track, index, charts);
+        chartsList.appendChild(trackCard);
+      });
+    }
+
+    // Create track card
+    function createTrackCard(track, index, playlist) {
+      const card = document.createElement('div');
+      card.className = 'bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 cursor-pointer';
+      card.innerHTML = `
+        <div class="flex items-center space-x-3">
+          <img src="${track.cover || '/placeholder.jpg'}" alt="Album cover" class="w-16 h-16 rounded-lg object-cover bg-gray-200" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNiAyMkMyNiAyMC44OTU0IDI2Ljg5NTQgMjAgMjggMjBIMzZDMzcuMTA0NiAyMCAzOCAyMC44OTU0IDM4IDIyVjI0SDI2VjIyWiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMjQgMjZDMjQgMjQuODk1NCAyNC44OTU0IDI0IDI2IDI0SDM4QzM5LjEwNDYgMjQgNDAgMjQuODk1NCA0MCAyNlY0MEg0MFY0MkMyNCA0Mi4yMDkxIDI0IDQyIDI0IDQyVjI2WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'" />
+          <div class="flex-1 min-w-0">
+            <h3 class="font-semibold text-gray-900 truncate">${track.title}</h3>
+            <p class="text-sm text-gray-600 truncate">${track.artist}</p>
+            <p class="text-xs text-gray-500 truncate">${track.album || 'Unknown Album'}</p>
+          </div>
+          <button class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition-colors">
+            <i data-feather="play" class="w-4 h-4"></i>
+          </button>
+        </div>
+      `;
+      
+      card.addEventListener('click', () => playTrack(track, index, playlist));
+      return card;
+    }
+
+    // Play track
+    async function playTrack(track, index, playlist) {
+      try {
+        status.textContent = 'Loading track...';
+        
+        // Find YouTube video
+        const query = `${track.title} ${track.artist}`;
+        const response = await api('/api/youtube', { q: query });
+        if (!response.ok) throw new Error('YouTube search failed');
+        const youtubeData = await response.json();
+        
+        if (!youtubeData.id) {
+          status.textContent = 'Could not find track on YouTube';
+          return;
+        }
+
+        currentTrack = { ...track, youtubeId: youtubeData.id };
+        currentPlaylist = playlist;
+        currentIndex = index;
+
+        await ensureYouTubePlayer();
+        player.loadVideoById(youtubeData.id);
+        
+        updatePlayerUI();
+        showPlayerBar();
+        enableControls();
+        
+        status.textContent = '';
+      } catch (error) {
+        console.error('Play error:', error);
+        status.textContent = 'Failed to play track';
+      }
+    }
+
+    // Update player UI
+    function updatePlayerUI() {
+      if (!currentTrack) return;
+
+      const cover = currentTrack.cover || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNiAyMkMyNiAyMC44OTU0IDI2Ljg5NTQgMjAgMjggMjBIMzZDMzcuMTA0NiAyMCAzOCAyMC44OTU0IDM4IDIyVjI0SDI2VjIyWiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMjQgMjZDMjQgMjQuODk1NCAyNC44OTU0IDI0IDI2IDI0SDM4QzM5LjEwNDYgMjQgNDAgMjQuODk1NCA0MCAyNlY0MEg0MFY0MkMyNCA0Mi4yMDkxIDI0IDQyIDI0IDQyVjI2WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
+      
+      // Update bottom player bar
+      playerCover.src = cover;
+      playerTitle.textContent = currentTrack.title;
+      playerArtist.textContent = currentTrack.artist;
+
+      // Update expanded player
+      expandedCover.src = cover;
+      expandedTitle.textContent = currentTrack.title;
+      expandedArtist.textContent = currentTrack.artist;
+      expandedAlbum.textContent = currentTrack.album || 'Unknown Album';
+    }
+
+    // Show player bar
+    function showPlayerBar() {
+      playerBar.classList.add('visible');
+    }
+
+    // Enable controls
+    function enableControls() {
+      playPauseBtn.disabled = false;
+      expandBtn.disabled = false;
+      document.getElementById('prevBtn').disabled = currentIndex <= 0;
+      document.getElementById('nextBtn').disabled = currentIndex >= currentPlaylist.length - 1;
+      
+      // Expanded player controls
+      expandedPlayPauseBtn.disabled = false;
+      document.getElementById('expandedPrevBtn').disabled = currentIndex <= 0;
+      document.getElementById('expandedNextBtn').disabled = currentIndex >= currentPlaylist.length - 1;
+      rewind10Btn.disabled = false;
+      forward10Btn.disabled = false;
+      progressBar.disabled = false;
+      
+      // Enable iTunes metadata button
+      const iTunesBtn = document.getElementById('iTunesMetadataBtn');
+      if (iTunesBtn) {
+        iTunesBtn.disabled = false;
+      }
+    }
+
+    // YouTube Player setup
+    function ensureYouTubePlayer() {
+      return new Promise((resolve) => {
+        if (window.YT && player) {
+          resolve();
+          return;
+        }
+
+        if (!window.YT) {
+          const tag = document.createElement('script');
+          tag.src = 'https://www.youtube.com/iframe_api';
+          const firstScriptTag = document.getElementsByTagName('script')[0];
+          firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        }
+
+        window.onYouTubeIframeAPIReady = () => {
+          player = new YT.Player('youtubePlayer', {
+            height: '1',
+            width: '1',
+            events: {
+              onReady: () => resolve(),
+              onStateChange: onPlayerStateChange,
+              onError: onPlayerError
+            },
+            playerVars: {
+              autoplay: 1,
+              controls: 0,
+              disablekb: 1,
+              fs: 0,
+              modestbranding: 1,
+              rel: 0
+            }
+          });
+        };
+      });
+    }
+
+    // YouTube player event handlers
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.PLAYING) {
+        isPlaying = true;
+        updatePlayButton();
+        startProgressTracking();
+      } else if (event.data === YT.PlayerState.PAUSED) {
+        isPlaying = false;
+        updatePlayButton();
+        stopProgressTracking();
+      } else if (event.data === YT.PlayerState.ENDED) {
+        isPlaying = false;
+        updatePlayButton();
+        stopProgressTracking();
+        // Auto-play next track
+        if (currentIndex < currentPlaylist.length - 1) {
+          playTrack(currentPlaylist[currentIndex + 1], currentIndex + 1, currentPlaylist);
+        }
+      }
+    }
+
+    function onPlayerError(event) {
+      console.error('YouTube player error:', event.data);
+      status.textContent = 'Playback error. Try another track.';
+    }
+
+    // Update play button icons
+    function updatePlayButton() {
+      const playIcon = isPlaying ? 'pause' : 'play';
+      playPauseBtn.innerHTML = `<i data-feather="${playIcon}" class="w-5 h-5"></i>`;
+      expandedPlayPauseBtn.innerHTML = `<i data-feather="${playIcon}" class="w-6 h-6"></i>`;
+      feather.replace();
+    }
+
+    // Progress tracking
+    let progressInterval;
+
+    function startProgressTracking() {
+      progressInterval = setInterval(() => {
+        if (player && player.getCurrentTime) {
+          const currentTime = player.getCurrentTime();
+          const duration = player.getDuration();
+          
+          if (duration > 0) {
+            const progress = (currentTime / duration) * 100;
+            progressBar.value = progress;
+            
+            currentTimeEl.textContent = formatTime(currentTime);
+            totalTimeEl.textContent = formatTime(duration);
+          }
+        }
+      }, 1000);
+    }
+
+    function stopProgressTracking() {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', debounce((e) => searchMusic(e.target.value), 300));
+    
+    countrySelect.addEventListener('change', (e) => loadTopCharts(e.target.value));
+
+    playPauseBtn.addEventListener('click', () => {
+      if (player) {
+        if (isPlaying) {
+          player.pauseVideo();
+        } else {
+          player.playVideo();
+        }
+      }
+    });
+
+    expandedPlayPauseBtn.addEventListener('click', () => {
+      if (player) {
+        if (isPlaying) {
+          player.pauseVideo();
+        } else {
+          player.playVideo();
+        }
+      }
+    });
+
+    expandBtn.addEventListener('click', () => {
+      expandedPlayer.classList.add('visible');
+    });
+
+    minimizeBtn.addEventListener('click', () => {
+      expandedPlayer.classList.remove('visible');
+    });
+
+    // Seek functionality
+    progressBar.addEventListener('input', (e) => {
+      if (player && player.getDuration) {
+        const duration = player.getDuration();
+        const seekTime = (e.target.value / 100) * duration;
+        player.seekTo(seekTime);
+      }
+    });
+
+    // Speed control
+    speedControl.addEventListener('change', (e) => {
+      if (player && player.setPlaybackRate) {
+        player.setPlaybackRate(parseFloat(e.target.value));
+      }
+    });
+
+    // Skip controls
+    rewind10Btn.addEventListener('click', () => {
+      if (player && player.getCurrentTime) {
+        const currentTime = player.getCurrentTime();
+        player.seekTo(Math.max(0, currentTime - 10));
+      }
+    });
+
+    forward10Btn.addEventListener('click', () => {
+      if (player && player.getCurrentTime && player.getDuration) {
+        const currentTime = player.getCurrentTime();
+        const duration = player.getDuration();
+        player.seekTo(Math.min(duration, currentTime + 10));
+      }
+    });
+
+    // Previous/Next track
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (currentIndex > 0) {
+        playTrack(currentPlaylist[currentIndex - 1], currentIndex - 1, currentPlaylist);
+      }
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (currentIndex < currentPlaylist.length - 1) {
+        playTrack(currentPlaylist[currentIndex + 1], currentIndex + 1, currentPlaylist);
+      }
+    });
+
+    document.getElementById('expandedPrevBtn').addEventListener('click', () => {
+      if (currentIndex > 0) {
+        playTrack(currentPlaylist[currentIndex - 1], currentIndex - 1, currentPlaylist);
+      }
+    });
+
+    document.getElementById('expandedNextBtn').addEventListener('click', () => {
+      if (currentIndex < currentPlaylist.length - 1) {
+        playTrack(currentPlaylist[currentIndex + 1], currentIndex + 1, currentPlaylist);
+      }
+    });
+
+    // iTunes metadata functionality
+    document.getElementById('iTunesMetadataBtn').addEventListener('click', async () => {
+      if (!currentTrack) return;
+      
+      try {
+        let metadata = null;
+        
+        // If the track has an iTunes ID (from charts), use the iTunes API directly
+        if (currentTrack.id && currentTrack.source === 'iTunes') {
+          const response = await fetch(`/api/itunes/${currentTrack.id}`);
+          if (response.ok) {
+            metadata = await response.json();
+          }
+        }
+        
+        // If no direct metadata found, try searching iTunes
+        if (!metadata) {
+          const response = await api('/search', { 
+            query: `${currentTrack.title} ${currentTrack.artist}`, 
+            source: 'itunes' 
+          });
+          const data = await response.json();
+          
+          if (data.success && data.tracks && data.tracks.length > 0) {
+            metadata = data.tracks[0];
+          }
+        }
+        
+        if (metadata) {
+          // Create modal to show iTunes metadata
+          const modal = document.createElement('div');
+          modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+          modal.innerHTML = `
+            <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">iTunes Information</h3>
+                <button class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+              </div>
+              <div class="space-y-3">
+                <div class="flex items-center space-x-3">
+                  <img src="${metadata.cover || ''}" alt="Album cover" class="w-16 h-16 rounded-lg object-cover bg-gray-200" />
+                  <div>
+                    <h4 class="font-semibold text-gray-900">${metadata.title}</h4>
+                    <p class="text-gray-600">${metadata.artist}</p>
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 gap-2 text-sm">
+                  <div><span class="font-medium">Album:</span> ${metadata.album || 'Unknown'}</div>
+                  <div><span class="font-medium">Genre:</span> ${metadata.genre || 'Unknown'}</div>
+                  <div><span class="font-medium">Release Date:</span> ${metadata.releaseDate ? new Date(metadata.releaseDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Unknown'}</div>
+                  ${metadata.durationMs ? `<div><span class="font-medium">Duration:</span> ${Math.floor(metadata.durationMs / 60000)}:${String(Math.floor((metadata.durationMs % 60000) / 1000)).padStart(2, '0')}</div>` : ''}
+                  ${metadata.iTunesUrl ? `<div><a href="${metadata.iTunesUrl}" target="_blank" class="text-blue-500 hover:text-blue-600">View on iTunes</a></div>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+          
+          document.body.appendChild(modal);
+          
+          // Close modal functionality
+          modal.querySelector('button').addEventListener('click', () => {
+            document.body.removeChild(modal);
+          });
+          
+          modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+              document.body.removeChild(modal);
+            }
+          });
+        } else {
+          alert('iTunes metadata not found for this track.');
+        }
+      } catch (error) {
+        console.error('Error fetching iTunes metadata:', error);
+        alert('Failed to fetch iTunes metadata.');
+      }
+    });
+
+    // Initialize
+    loadTopCharts();
+  </script>
+</body>
+</html>

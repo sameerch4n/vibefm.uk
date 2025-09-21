@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mango Music</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="./src/img/apple_music.png">
+</head>
+<body>
+    <!-- Main container -->
+    <div class="app-container">
+        <!-- Left sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fab fa-apple"></i>
+                <span>Music</span>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li class="active"><i class="fas fa-home"></i>Listen Now</li>
+                    <li><i class="fas fa-compass"></i>Browse</li>
+                    <li><i class="fas fa-broadcast-tower"></i>Radio</li>
+                    <li><i class="fas fa-music"></i>Library</li>
+                    <li><i class="fas fa-search"></i>Search</li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <!-- Top navigation bar -->
+            <header class="header">
+                <div class="nav-controls">
+                    <div class="nav-arrows">
+                        <button><i class="fas fa-chevron-left"></i></button>
+                        <button><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="account">
+                        <button class="account-btn">
+                            <!-- TODO: replace with actual user profile pic -->
+                            <img src="./src/img/applenobg.png" alt="User Profile" class="user-profile-img" style="width: 50px; height: 50px;">
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main content section -->
+            <section class="hero-section">
+                <h1>Listen Now</h1>
+                <div class="featured-content">
+                    <h2>Recently Played</h2>
+                    <div class="music-grid">
+                        <!-- Card 1 -->
+                        <div class="music-card" data-song="weeknd.mp3">
+                            <div class="music-card-img">
+                                <img src="./src/img/weeknd.png" alt="Album Cover">
+                                <div class="play-overlay">
+                                    <button class="play-btn"><i class="fas fa-play"></i></button>
+                                </div>
+                            </div>
+                            <div class="music-card-info">
+                                <h3>Reflections Laughing</h3>
+                                <p>The Weeknd</p>
+                            </div>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="music-card" data-song="tyler.mp3">
+                            <div class="music-card-img">
+                                <img src="./src/img/tyler.png" alt="Album Cover">
+                                <div class="play-overlay">
+                                    <button class="play-btn"><i class="fas fa-play"></i></button>
+                                </div>
+                            </div>
+                            <div class="music-card-info">
+                                <h3>See you again</h3>
+                                <p>Tyler the Creator & Kalis Uchis</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Card 3 -->
+                        <div class="music-card" data-song="kanye.mp3">
+                            <div class="music-card-img">
+                                <img src="./src/img/kanye.png" alt="Album Cover">
+                                <div class="play-overlay">
+                                    <button class="play-btn"><i class="fas fa-play"></i></button>
+                                </div>
+                            </div>
+                            <div class="music-card-info">
+                                <h3>Saint Pablo</h3>
+                                <p>Kanye West</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Card 4 -->
+                        <div class="music-card" data-song="luther.mp3">
+                            <div class="music-card-img">
+                                <img src="./src/img/gnx.png" alt="Album Cover">
+                                <div class="play-overlay">
+                                    <button class="play-btn"><i class="fas fa-play"></i></button>
+                                </div>
+                            </div>
+                            <div class="music-card-info">
+                                <h3>Luther</h3>
+                                <p>Kendrick Lamar & SZA</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 5 -->
+                        <div class="music-card" data-song="luther.mp3">
+                            <div class="music-card-img">
+                                <img src="./src/img/namo.png" alt="Album Cover">
+                                <div class="play-overlay">
+                                    <button class="play-btn"><i class="fas fa-play"></i></button>
+                                </div>
+                            </div>
+                            <div class="music-card-info">
+                                <h3>Namo Namo</h3>
+                                <p>Amit Trivedi</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recommendations -->
+            <section class="recommendations">
+                <h2>Made For You</h2>
+                <div class="music-grid">
+                    <!-- Favorites playlist -->
+                    <div class="playlist-card">
+                        <div class="playlist-card-img">
+                            <img src="./src/img/made.gif" alt="Playlist Cover">
+                        </div>
+                        <div class="playlist-card-info">
+                            <h3>Favorites Mix</h3>
+                            <p>Based on listening</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Chill playlist -->
+                    <div class="playlist-card">
+                        <div class="playlist-card-img">
+                            <img src="./src/img/chill.gif" alt="Playlist Cover">
+                        </div>
+                        <div class="playlist-card-info">
+                            <h3>Chill Mix</h3>
+                            <p>Relaxing tracks for your evening</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Bollywood playlist -->
+                    <div class="playlist-card">
+                        <div class="playlist-card-img">
+                            <img src="./src/img/bolly.jpg" alt="Playlist Cover">
+                        </div>
+                        <div class="playlist-card-info">
+                            <h3>Bollywood Mix</h3>
+                            <p>New artists you might like</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <!-- Player controls -->
+        <footer class="player">
+            <div class="current-track">
+                <div class="track-img">
+                    <img id="current-track-img" src="/api/placeholder/60/60" alt="Now Playing">
+                </div>
+                <div class="track-info">
+                    <h4 id="current-track-title">Select a track</h4>
+                    <p id="current-track-artist">-</p>
+                </div>
+            </div>
+            
+            <!-- Center - playback controls -->
+            <div class="player-controls">
+                <div class="control-buttons">
+                    <button id="prev-btn"><i class="fas fa-step-backward"></i></button>
+                    <button id="play-pause-btn"><i class="fas fa-play"></i></button>
+                    <button id="next-btn"><i class="fas fa-step-forward"></i></button>
+                </div>
+                <div class="progress-container">
+                    <span id="current-time">0:00</span>
+                    <div class="progress-bar">
+                        <div class="progress"></div>
+                    </div>
+                    <span id="duration">0:00</span>
+                </div>
+            </div>
+            
+            <!-- Right side - volume control -->
+            <div class="volume-controls">
+                <i class="fas fa-volume-up"></i>
+                <div class="volume-slider">
+                    <div class="volume-progress"></div>
+                </div>
+            </div>
+            
+            <audio id="audio-player"></audio>
+        </footer>
+    </div>
+    <div class="watermark" style="position: fixed; bottom: 10px; right: 10px; opacity: 0.5; font-size: 12px; color: #888;">
+        © 2025 Mango Music. All rights reserved.
+    </div>
+    <script src="./script.js"></script>
+</body>
+</html>

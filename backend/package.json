@@ -1,0 +1,41 @@
+{
+  "name": "music-search-playback",
+  "version": "0.1.0",
+  "description": "Lightweight JS library to search songs (Spotify), fetch metadata, find on YouTube, and provide playback helpers.",
+  "keywords": [
+    "music",
+    "search",
+    "spotify",
+    "youtube",
+    "playback"
+  ],
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node ./scripts/build.cjs",
+    "dev": "npm run build -- --watch",
+    "start": "node server.js",
+    "test": "node test-api.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^4.19.2",
+    "node-fetch": "^3.3.2",
+    "play-dl": "^1.9.7",
+    "sharp": "^0.34.3"
+  }
+}
